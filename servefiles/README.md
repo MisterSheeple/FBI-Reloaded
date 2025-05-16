@@ -10,4 +10,4 @@ Simple Python script for serving local files to FBI's remote installer. Requires
 
 Simple Python script for sending one or more file URLs to FBI's remote installer. Requires [Python](https://www.python.org/downloads/).
 
-Usage: sendurls.py \<target ip\> \<url\> \[more urls\]
+**Usage**: sendurls.py \<target ip\> \<url\> \[more urls\]
