@@ -6,7 +6,7 @@ import time
 from urllib.parse import urlparse
 
 if len(sys.argv) < 3:
-    print(('Usage: ' + sys.argv[0] + ' <target ip> <url>...'))
+    print(('Usage: ' + sys.argv[0] + ' <target ip> <url> [more urls]'))
     sys.exit(1)
 
 target_ip = sys.argv[1]
