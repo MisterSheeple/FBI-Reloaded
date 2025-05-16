@@ -7,17 +7,12 @@ import struct
 import sys
 import threading
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
-try:
-    from SimpleHTTPServer import SimpleHTTPRequestHandler
-    from SocketServer import TCPServer
-    from urllib import quote
-    input = raw_input
-except ImportError:
-    from http.server import SimpleHTTPRequestHandler
-    from socketserver import TCPServer
-    from urllib.parse import quote
+
+from http.server import SimpleHTTPRequestHandler
+from socketserver import TCPServer
+from urllib.parse import quote
 
 interactive = False
     
@@ -25,13 +20,13 @@ if len(sys.argv) <= 2:
     # If there aren't enough variables, use interactive mode
     if len(sys.argv) == 2:
         if sys.argv[1].lower() in ('--help', '-help', 'help', 'h', '-h', '--h'):
-            print('Usage: ' + sys.argv[0] + ' <target ip> <file / directory> [host ip] [host port]')
+            print(('Usage: ' + sys.argv[0] + ' <target ip> <file / directory> [host ip] [host port]'))
             sys.exit(1)
     
     interactive = True
 
 elif len(sys.argv) < 3 or len(sys.argv) > 6:
-    print('Usage: ' + sys.argv[0] + ' <target ip> <file / directory> [host ip] [host port]')
+    print(('Usage: ' + sys.argv[0] + ' <target ip> <file / directory> [host ip] [host port]'))
     sys.exit(1)
 
 accepted_extension = ('.cia', '.tik', '.cetk', '.3dsx')
@@ -41,15 +36,14 @@ if interactive:
     target_ip = input("The IP of your 3DS: ")
     target_path = input("The file you want to send (.cia, .tik, .cetk, or .3dsx): ")
     
-    hostIp = input("Host IP (or press Enter to have the script detect host IP):")
+    hostIp = input("Host IP (or press Enter to have the script attempt to detect host IP): ")
     if hostIp == '':
         print('Detecting host IP...') 
         hostIp = [(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
     else:
-        hostPort = input("Host port (or press Enter to keep default, 8080):")
+        hostPort = input("Host port (or press Enter to keep default, 8080): ")
         if hostPort == '':
             hostPort = 8080 # Default
-    
 
 else:
     # (if the script is being run using a full python path; ex: "path/to/python script_name.py foo foo..")
@@ -80,7 +74,7 @@ else:
 
 target_path = target_path.strip()
 if not os.path.exists(target_path):
-    print(target_path + ': No such file or directory.')
+    print((target_path + ': No such file or directory.'))
     sys.exit(1)
 
 
@@ -92,7 +86,7 @@ if os.path.isfile(target_path):
         file_list_payload = baseUrl + quote(os.path.basename(target_path))
         directory = os.path.dirname(target_path)  # get file directory
     else:
-        print('Unsupported file extension. Supported extensions are: ' + accepted_extension)
+        print(('Unsupported file extension. Supported extensions are: ' + accepted_extension))
         sys.exit(1)
 
 else:
@@ -111,7 +105,7 @@ if directory and directory != '.':  # doesn't need to move if it's already the c
     os.chdir(directory)  # set working directory to the right folder to be able to serve files
 
 print('\nURLs:')
-print(file_list_payload + '\n')
+print((file_list_payload + '\n'))
 
 class MyServer(TCPServer):
     def server_bind(self):
@@ -119,13 +113,13 @@ class MyServer(TCPServer):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind(self.server_address)
 
-print('Opening HTTP server on port ' + str(hostPort))
+print(('Opening HTTP server on port ' + str(hostPort)))
 server = MyServer(('', hostPort), SimpleHTTPRequestHandler)
 thread = threading.Thread(target=server.serve_forever)
 thread.start()
 
 try:
-    print('Sending URL(s) to ' + target_ip + ' on port 5000...')
+    print(('Sending URL(s) to ' + target_ip + ' on port 5000...'))
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((target_ip, 5000))
     sock.sendall(struct.pack('!L', len(file_list_payloadBytes)) + file_list_payloadBytes)
@@ -133,7 +127,7 @@ try:
         time.sleep(0.05)
     sock.close()
 except Exception as e:
-    print('An error occurred: ' + str(e))
+    print(('An error occurred: ' + str(e)))
     server.shutdown()
     sys.exit(1)
 
